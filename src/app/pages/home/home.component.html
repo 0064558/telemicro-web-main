@@ -1,0 +1,80 @@
+<section class="hero" id="inicio" tabindex="-1" aria-labelledby="hero-title">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> SUA LOJA DE INFORMÁTICA EM SÃO JOÃO EVANGELISTA</p>
+      <h1 id="hero-title">A tecnologia<br />faz parte da vida.<br /><span>A gente cuida<br class="desktop-break" /> dela.</span></h1>
+      <p class="hero-description">Do computador novo ao reparo que você precisa. Equipamentos, assistência técnica e suporte, com a proximidade de uma loja da sua cidade.</p>
+      <div class="hero-actions">
+        <a class="button" href="#contato">Pedir um orçamento <app-icon name="arrow" /></a>
+        <a class="text-link" href="#servicos">Conhecer os serviços <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-note"><span class="small-rule" aria-hidden="true"></span> Na loja ou online. Conte com a Telemicro.</div>
+    </div>
+    <div class="hero-visual" appReveal [appRevealDelay]="140">
+      <div class="photo-topline"><span>TELEMICRO / INFORMÁTICA</span><span aria-hidden="true">↗</span></div>
+      <div class="hero-photo">
+        <img src="assets/img/telemicro-inside.webp" width="1360" height="944" alt="Interior da loja Telemicro Informática, com balcão de atendimento, computadores e produtos em exposição" fetchpriority="high" decoding="async" />
+        <div class="photo-caption"><span>POR DENTRO DA TECNOLOGIA.<br /><strong>Por perto de você.</strong></span><span class="cross-mark" aria-hidden="true">+</span></div>
+      </div>
+      <div class="visual-bottom"><app-icon name="tools" /><span>Assistência, equipamentos<br /><strong>e soluções para o dia a dia.</strong></span><span class="visual-index" aria-hidden="true">TM.</span></div>
+    </div>
+  </div>
+  <div class="container expertise-strip" aria-label="Áreas de atuação"><span>SEU PRÓXIMO PASSO, COM A GENTE</span><p>Reparar <span aria-hidden="true">/</span> Equipar <span aria-hidden="true">/</span> Conectar</p><a href="#servicos" aria-label="Explorar os serviços"><app-icon name="arrow" /></a></div>
+</section>
+
+<section class="services section-light" id="servicos" tabindex="-1" aria-labelledby="services-title">
+  <div class="section-signal" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <div class="container">
+    <div class="section-heading" appReveal>
+      <div><p class="eyebrow">01 / O QUE A GENTE FAZ</p><h2 id="services-title">Para cada necessidade,<br />uma solução.</h2></div>
+      <p>Seu equipamento precisa de atenção?<br />Está na hora de escolher um novo?<br />Comece por aqui.</p>
+    </div>
+    <div class="services-grid">
+      @for (service of services; track service.number; let index = $index) {
+        <article class="service-card" appReveal [appRevealDelay]="index * 70">
+          <div class="service-top"><app-icon [name]="service.icon" /><span>{{ service.number }}</span></div>
+          <h3>{{ service.title }}</h3>
+          <p>{{ service.description }}</p>
+          <p class="service-detail">{{ service.detail }}</p>
+        </article>
+      }
+    </div>
+    <div class="services-bottom" appReveal>
+      <figure class="services-visual">
+        <img src="assets/img/telemicro-keyboard.webp" width="1360" height="765" loading="lazy" decoding="async" alt="Teclado de notebook retroiluminado em tons de azul" />
+      </figure>
+      <div class="services-cta">
+        <span>ATENDIMENTO DIRETO / TELEMICRO</span>
+        <p>Não encontrou o que procura? Conte para a gente qual equipamento, acessório ou serviço você precisa.</p>
+        <a class="text-link" [href]="company.whatsapp" target="_blank" rel="noopener noreferrer">Conversar no WhatsApp <app-icon name="diagonal" /></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="store-section" id="galeria" tabindex="-1" aria-labelledby="store-title">
+  <div class="store-glow" aria-hidden="true"></div>
+  <div class="container store-grid">
+    <div class="store-media" appReveal>
+      <figure class="store-photo"><div class="image-frame"><img src="assets/img/loja.jpg" width="960" height="540" loading="lazy" decoding="async" alt="Fachada azul da Telemicro Informática, com a entrada e a vitrine da loja" /><span class="focus-corners" aria-hidden="true"></span></div><figcaption><span>A NOSSA LOJA, NA SUA CIDADE.</span><app-icon name="pin" /></figcaption></figure>
+      <figure class="store-detail"><img src="assets/img/telemicro-inside2.webp" width="1360" height="907" loading="lazy" decoding="async" alt="Notebooks e tablets expostos no interior da Telemicro Informática" /><figcaption>PRODUTOS PARA CONHECER DE PERTO.</figcaption></figure>
+    </div>
+    <div class="store-copy" appReveal [appRevealDelay]="140"><p class="eyebrow">02 / PRAZER, TELEMICRO</p><h2 id="store-title">Tecnologia tem a ver<br />com proximidade.</h2><p>Somos uma loja de informática em São João Evangelista, MG. Reunimos equipamentos, acessórios e serviços técnicos para o seu dia a dia.</p><p>Venha conversar sobre o que você precisa, conhecer as opções ou trazer seu equipamento para atendimento.</p><address><app-icon name="pin" /><span>{{ company.street }}<br /><strong>{{ company.city }}</strong></span></address><a class="text-link" [href]="company.maps" target="_blank" rel="noopener noreferrer">Ver endereço no Google Maps <app-icon name="diagonal" /></a></div>
+  </div>
+</section>
+
+<section class="care-section section-light" aria-labelledby="care-title">
+  <div class="circuit-lines" aria-hidden="true"></div>
+  <div class="container care-grid">
+    <div class="care-copy" appReveal><p class="eyebrow">DO PRIMEIRO CONTATO À SOLUÇÃO</p><h2 id="care-title">Vamos entender<br />o que você precisa.</h2><p>Uma dúvida, um reparo ou um novo equipamento. Fale com a gente para encontrar o próximo passo.</p><ol class="steps"><li><span>01</span><div><h3>Conte pra gente</h3><p>Use o WhatsApp ou o formulário de orçamento.</p></div></li><li><span>02</span><div><h3>Explique sua necessidade</h3><p>Informe o equipamento ou o serviço que procura.</p></div></li><li><span>03</span><div><h3>Combine os detalhes</h3><p>Converse com a equipe sobre as opções e o atendimento.</p></div></li></ol></div>
+    <figure class="care-photo" appReveal [appRevealDelay]="140"><div class="image-frame"><img src="assets/img/manutencao-900.jpg" width="900" height="600" loading="lazy" decoding="async" alt="Instalação de memória no interior de um notebook durante uma manutenção" /><span class="focus-corners" aria-hidden="true"></span></div><figcaption><app-icon name="tools" /><span>Seu equipamento.<br /><strong>Nossa atenção aos detalhes.</strong></span></figcaption></figure>
+  </div>
+</section>
+
+<section class="contact-section" id="contato" tabindex="-1" aria-labelledby="contact-title">
+  <div class="contact-orbit" aria-hidden="true"></div>
+  <div class="container contact-grid">
+    <div class="contact-copy" appReveal><p class="eyebrow">03 / VAMOS CONVERSAR</p><h2 id="contact-title">Qual é o seu<br />próximo passo?</h2><p>Conte com a Telemicro para cuidar da sua tecnologia. Peça um orçamento ou fale diretamente com a equipe.</p><div class="contact-links"><a [href]="company.whatsapp" target="_blank" rel="noopener noreferrer"><app-icon name="message" /><span><small>WHATSAPP</small><strong>{{ company.phone }}</strong></span><app-icon name="diagonal" /></a><a [href]="'mailto:' + company.email"><app-icon name="mail" /><span><small>E-MAIL</small><strong>{{ company.email }}</strong></span><app-icon name="diagonal" /></a><a [href]="company.maps" target="_blank" rel="noopener noreferrer"><app-icon name="pin" /><span><small>VENHA ATÉ A LOJA</small><strong>{{ company.street }}</strong><span>{{ company.city }}</span></span><app-icon name="diagonal" /></a></div></div>
+    <div appReveal [appRevealDelay]="140"><app-budget-form /></div>
+  </div>
+</section>

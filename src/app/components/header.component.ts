@@ -1,53 +1,55 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { COMPANY } from '../core/company';
+import { IconComponent } from './icon.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [IconComponent],
   template: `
-    <header>
-      <div class="nav-container">
-        <a routerLink="/" class="logo" aria-label="Telemicro Informática - início">
-          <img src="assets/img/LogoModificada2.png" alt="Telemicro Informática" />
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="#inicio" class="brand" aria-label="Telemicro Informática — início" (click)="isMenuOpen = false">
+          <img src="assets/img/LogoModificada2_resized.png" width="500" height="370" alt="Telemicro Informática" />
         </a>
-
-        <nav aria-label="Navegação principal">
-          <ul>
-            <li><a routerLink="/" fragment="inicio">Início</a></li>
-            <li><a routerLink="/" fragment="servicos">Serviços</a></li>
-            <li><a routerLink="/" fragment="galeria">Loja</a></li>
-            <li><a routerLink="/" fragment="contato">Contato</a></li>
-          </ul>
-        </nav>
-
-        <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Abrir/fechar menu" [attr.aria-expanded]="isMenuOpen" (click)="toggleMenu()">
-          <span></span><span></span><span></span>
+        <button #menuButton class="menu-toggle" type="button" aria-controls="principal" [attr.aria-expanded]="isMenuOpen" (click)="isMenuOpen = !isMenuOpen">
+          {{ isMenuOpen ? 'Fechar' : 'Menu' }} <span aria-hidden="true">{{ isMenuOpen ? '×' : '☰' }}</span>
         </button>
-
-        <nav id="mobile-menu" class="mobile-menu" [class.active]="isMenuOpen" aria-label="Navegação mobile">
-          <ul>
-            <li><a routerLink="/" fragment="inicio" (click)="closeMenu()">Início</a></li>
-            <li><a routerLink="/" fragment="servicos" (click)="closeMenu()">Serviços</a></li>
-            <li><a routerLink="/" fragment="galeria" (click)="closeMenu()">Loja</a></li>
-            <li><a routerLink="/" fragment="contato" (click)="closeMenu()">Contato</a></li>
-            <li><a href="https://wa.me/553334122826" target="_blank" rel="noopener noreferrer" (click)="closeMenu()">WhatsApp</a></li>
-          </ul>
+        <nav id="principal" class="main-nav" [class.is-open]="isMenuOpen" aria-label="Navegação principal" (click)="closeAfterNavigation($event)">
+          <a href="#servicos">Serviços</a>
+          <a href="#galeria">A Telemicro</a>
+          <a href="#contato">Contato</a>
+          <a class="button button-small" [href]="company.whatsapp" target="_blank" rel="noopener noreferrer">Fale com a gente <app-icon name="diagonal" /></a>
         </nav>
-
-        <a href="https://wa.me/553334122826" target="_blank" rel="noopener noreferrer" class="btn-cta desktop-only">WHATSAPP</a>
       </div>
     </header>
-  `
+  `,
+  styleUrl: './header.component.css'
 })
 export class HeaderComponent {
+  readonly company = COMPANY;
   isMenuOpen = false;
+  @ViewChild('menuButton') menuButton?: ElementRef<HTMLButtonElement>;
 
-  toggleMenu(): void {
-    this.isMenuOpen = !this.isMenuOpen;
+  closeAfterNavigation(event: MouseEvent): void {
+    const link = (event.target as HTMLElement).closest('a');
+    if (!link) return;
+    const wasOpen = this.isMenuOpen;
+    this.isMenuOpen = false;
+    if (wasOpen) {
+      const href = link.getAttribute('href');
+      if (href?.startsWith('#')) {
+        document.getElementById(href.slice(1))?.focus({ preventScroll: true });
+      } else {
+        this.menuButton?.nativeElement.focus();
+      }
+    }
   }
 
-  closeMenu(): void {
-    this.isMenuOpen = false;
+  @HostListener('document:keydown.escape') closeMenu(): void {
+    if (this.isMenuOpen) {
+      this.isMenuOpen = false;
+      this.menuButton?.nativeElement.focus();
+    }
   }
 }
