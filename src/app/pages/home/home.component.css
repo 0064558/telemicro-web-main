@@ -121,9 +121,10 @@ h1 > span { background: linear-gradient(100deg, var(--cyan) 0%, #48baf0 68%, #f0
   .store-photo figcaption { padding: 16px; font-size: 9px; }
 }
 
-.hero { position: relative; isolation: isolate; background: linear-gradient(90deg, rgba(3,20,39,.74), rgba(4,27,51,.48)); min-height: calc(100svh - 100px); }
-.hero::before { content: ''; position: absolute; z-index: -2; inset: 0; background-image: linear-gradient(rgba(99,227,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(99,227,255,.05) 1px, transparent 1px); background-size: 64px 64px; mask-image: linear-gradient(to bottom, #000 0 64%, transparent 96%); }
-.hero::after { content: ''; position: absolute; z-index: -1; width: 720px; height: 720px; right: -240px; top: -270px; border-radius: 50%; background: radial-gradient(circle at 42% 58%, rgba(0,187,238,.2), rgba(22,127,209,.08) 40%, transparent 67%); filter: blur(8px); pointer-events: none; }
+.hero { position: relative; isolation: isolate; overflow: hidden; background: linear-gradient(90deg, #031427, #041b33); min-height: calc(100svh - 100px); }
+.hero-background-video { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .3; filter: brightness(.65) saturate(1.1); pointer-events: none; }
+.hero::before { content: ''; position: absolute; z-index: 1; inset: 0; background-image: linear-gradient(rgba(99,227,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(99,227,255,.05) 1px, transparent 1px); background-size: 64px 64px; mask-image: linear-gradient(to bottom, #000 0 64%, transparent 96%); pointer-events: none; }
+.hero::after { content: ''; position: absolute; z-index: 1; width: 720px; height: 720px; right: -240px; top: -270px; border-radius: 50%; background: radial-gradient(circle at 42% 58%, rgba(0,187,238,.2), rgba(22,127,209,.08) 40%, transparent 67%); filter: blur(8px); pointer-events: none; }
 .hero-grid { position: relative; z-index: 2; }
 .status-dot { box-shadow: 0 0 0 0 rgba(117,235,231,.5); }
 .hero-visual { position: relative; transform: perspective(1000px) rotateY(-1.5deg) rotateZ(.35deg); border-color: rgba(99,227,255,.32); box-shadow: 0 34px 80px rgba(0,8,22,.4), -18px 8px 55px rgba(0,105,193,.16), 0 0 0 8px rgba(99,227,255,.025), inset 0 0 0 1px rgba(255,255,255,.03); }
@@ -132,7 +133,7 @@ h1 > span { background: linear-gradient(100deg, var(--cyan) 0%, #48baf0 68%, #f0
 .hero-visual:hover .hero-photo img { transform: scale(1.035); filter: contrast(1.04) saturate(1.08); }
 .visual-bottom { position: relative; }
 .visual-bottom::after { content: ''; position: absolute; left: 0; top: 0; height: 1px; width: 38%; background: linear-gradient(90deg, var(--cyan), transparent); }
-.expertise-strip { position: relative; }
+.expertise-strip { position: relative; z-index: 2; }
 .expertise-strip::before { content: ''; position: absolute; width: 110px; height: 1px; left: 0; top: -1px; background: linear-gradient(90deg, var(--brand-red), var(--brand-blue), var(--cyan)); box-shadow: 0 0 16px rgba(117,235,231,.55); }
 .expertise-strip a { transition: transform 220ms ease; }
 .expertise-strip a:hover { transform: translateX(6px); }

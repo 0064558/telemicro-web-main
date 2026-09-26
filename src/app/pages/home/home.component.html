@@ -1,4 +1,9 @@
 <section class="hero" id="inicio" tabindex="-1" aria-labelledby="hero-title">
+  @if (!reduceMotion()) {
+    <video class="hero-background-video" autoplay [muted]="true" loop playsinline preload="metadata" aria-hidden="true" tabindex="-1">
+      <source src="assets/video/telemicro-hero.mp4" type="video/mp4" />
+    </video>
+  }
   <div class="container hero-grid">
     <div class="hero-copy">
       <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> SUA LOJA DE INFORMÁTICA EM SÃO JOÃO EVANGELISTA</p>

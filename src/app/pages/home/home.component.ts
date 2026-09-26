@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { IconComponent, IconName } from '../../components/icon.component';
 import { BudgetFormComponent } from '../../components/budget-form.component';
 import { COMPANY } from '../../core/company';
@@ -12,6 +12,8 @@ import { RevealDirective } from '../../core/reveal.directive';
   styleUrl: './home.component.css'
 })
 export class HomeComponent {
+  private readonly destroyRef = inject(DestroyRef);
+  readonly reduceMotion = signal(false);
   readonly company = COMPANY;
   readonly services: { number: string; icon: IconName; title: string; description: string; detail: string }[] = [
     { number: '01', icon: 'tools', title: 'Assistência técnica', description: 'Cuidado para seu computador continuar acompanhando você.', detail: 'Manutenção, formatação, upgrades, limpeza e recuperação.' },
@@ -21,4 +23,14 @@ export class HomeComponent {
     { number: '05', icon: 'rental', title: 'Locação de equipamentos', description: 'Uma alternativa à compra para a sua necessidade.', detail: 'Locação de computadores e impressoras. Consulte as opções.' },
     { number: '06', icon: 'shield', title: 'Manutenção preventiva', description: 'Inclua o cuidado com os equipamentos na sua rotina.', detail: 'Consulte nossos planos de manutenção preventiva.' }
   ];
+
+  constructor() {
+    if (typeof window === 'undefined') return;
+
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.reduceMotion.set(motionPreference.matches);
+    const updateMotionPreference = (event: MediaQueryListEvent) => this.reduceMotion.set(event.matches);
+    motionPreference.addEventListener('change', updateMotionPreference);
+    this.destroyRef.onDestroy(() => motionPreference.removeEventListener('change', updateMotionPreference));
+  }
 }

@@ -9,7 +9,7 @@ import { IconComponent } from './icon.component';
   template: `
     <header class="site-header">
       <div class="container header-inner">
-        <a href="#inicio" class="brand" aria-label="Telemicro Informática — início" (click)="isMenuOpen = false">
+        <a href="#inicio" class="brand" aria-label="Telemicro Informática — início" (click)="goToStart($event)">
           <img src="assets/img/LogoModificada2_resized.png" width="500" height="370" alt="Telemicro Informática" />
         </a>
         <button #menuButton class="menu-toggle" type="button" aria-controls="principal" [attr.aria-expanded]="isMenuOpen" (click)="isMenuOpen = !isMenuOpen">
@@ -30,6 +30,18 @@ export class HeaderComponent {
   readonly company = COMPANY;
   isMenuOpen = false;
   @ViewChild('menuButton') menuButton?: ElementRef<HTMLButtonElement>;
+
+  goToStart(event: MouseEvent): void {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    this.isMenuOpen = false;
+    history.replaceState(null, '', '#inicio');
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    });
+  }
 
   closeAfterNavigation(event: MouseEvent): void {
     const link = (event.target as HTMLElement).closest('a');
