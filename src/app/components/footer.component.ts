@@ -7,7 +7,7 @@ import { COMPANY } from '../core/company';
   template: `
     <footer class="site-footer">
       <div class="container footer-top">
-        <div><a href="#inicio"><img src="assets/img/LogoModificada2_resized.png" width="115" height="85" alt="Telemicro Informática — início" loading="lazy" /></a><p>Tecnologia perto de você.<br />{{ company.city }}</p></div>
+        <div><a href="#inicio"><img src="assets/img/LogoModificada2_resized.png" width="115" height="85" alt="Telemicro Informática — início" loading="lazy" /></a><p>Assistência técnica, suprimentos e acessórios de informática.<br />{{ company.city }}</p></div>
         <nav aria-label="Navegação do rodapé"><a href="#servicos">Nossos serviços</a><a href="#galeria">Conheça a loja</a><a href="#contato">Pedir um orçamento</a></nav>
         <div class="footer-contact"><a [href]="company.whatsapp" target="_blank" rel="noopener noreferrer">{{ company.phone }}</a><a [href]="'mailto:' + company.email">{{ company.email }}</a><a [href]="company.maps" target="_blank" rel="noopener noreferrer">{{ company.street }}</a></div>
       </div>
