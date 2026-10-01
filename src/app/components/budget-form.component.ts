@@ -5,6 +5,7 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Va
 import { finalize, timeout } from 'rxjs';
 import { COMPANY } from '../core/company';
 import { IconComponent } from './icon.component';
+import { API_URL, ServiceOption, apiError } from '../core/api';
 
 export function phoneValidator(control: AbstractControl): ValidationErrors | null {
   const value = String(control.value ?? '').trim();
@@ -27,7 +28,23 @@ export class BudgetFormComponent {
   @ViewChild('formElement') formElement?: ElementRef<HTMLFormElement>;
 
   readonly company = COMPANY;
-  readonly options = ['Assistência técnica', 'Equipamentos e acessórios', 'Recarga de cartuchos e toner', 'Suporte presencial ou online', 'Locação de equipamentos', 'Manutenção preventiva', 'Outro assunto'];
+  private readonly api = inject(API_URL);
+  options: ServiceOption[] = [];
+  catalogLoading = true;
+  catalogError = '';
+  protocol = '';
+  private retryPayload = '';
+  private retryKey = '';
+  constructor() { this.loadServices(); }
+  loadServices(): void {
+    if (!this.catalogLoading && this.options.length) return;
+    this.catalogLoading = true;
+    this.catalogError = '';
+    this.http.get<ServiceOption[]>(`${this.api}/services`).pipe(timeout(90000), takeUntilDestroyed(this.destroyRef), finalize(() => this.catalogLoading = false)).subscribe({
+      next: options => { this.options = options; if (!options.length) this.catalogError = 'Nenhum serviço disponível no momento.'; },
+      error: () => this.catalogError = 'Não foi possível carregar os serviços. Tente novamente.'
+    });
+  }
   readonly budgetForm = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
     telefone: ['', [Validators.required, phoneValidator]],
@@ -53,21 +70,25 @@ export class BudgetFormComponent {
       return;
     }
 
-    const formData = new FormData();
-    Object.entries(this.budgetForm.getRawValue()).forEach(([key, value]) => formData.append(key, value.trim()));
-    formData.append('_subject', 'Novo Orçamento - Telemicro Informática');
+    const value = this.budgetForm.getRawValue();
+    if (!this.options.some(option => option.code === value.servico)) { this.errorMessage = 'Selecione um serviço disponível.'; return; }
+    const payload = { customerName: value.nome.trim(), phone: value.telefone.trim(), serviceCode: value.servico, message: value.mensagem.trim() };
+    const serialized = JSON.stringify(payload);
+    if (serialized !== this.retryPayload) { this.retryPayload = serialized; this.retryKey = crypto.randomUUID(); }
     this.submitting = true;
-    // Enviar o formulário para o endpoint da empresa usando HttpClient
-    this.http.post(COMPANY.formEndpoint, formData, { headers: { Accept: 'application/json' } })
-      .pipe(timeout(20000), takeUntilDestroyed(this.destroyRef), finalize(() => (this.submitting = false)))
+    this.http.post<{ protocol: string }>(`${this.api}/budgets`, payload, { headers: { 'Idempotency-Key': this.retryKey } })
+      .pipe(timeout(90000), takeUntilDestroyed(this.destroyRef), finalize(() => (this.submitting = false)))
       .subscribe({
         // Se a requisição for bem-sucedida, exibir uma mensagem de sucesso e limpar o formulário
-        next: () => {
+        next: response => {
+          this.protocol = response.protocol;
+          this.retryPayload = '';
+          this.retryKey = '';
           this.success = true;
           this.budgetForm.reset();
         },
-        error: () => {
-          this.errorMessage = 'Não foi possível confirmar o envio. Seus dados foram mantidos. Tente novamente ou fale com a gente pelo WhatsApp.';
+        error: error => {
+          this.errorMessage = ((error.status === 400 || error.status === 429) ? apiError(error) : 'Não foi possível confirmar o envio.') + ' Seus dados foram mantidos. Tente novamente ou fale com a gente pelo WhatsApp.';
         }
       });
   }

@@ -19,6 +19,8 @@ describe('BudgetFormComponent', () => {
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+    http.expectOne('/api/v1/services').flush([{ code: 'TECHNICAL_ASSISTANCE', name: 'Assistência técnica' }]);
+    fixture.detectChanges();
   });
   afterEach(() => http.verify());
 
@@ -26,7 +28,7 @@ describe('BudgetFormComponent', () => {
     component.budgetForm.setValue({
       nome: ' Cliente de teste ',
       telefone: '(33) 99999-9999',
-      servico: 'Assistência técnica',
+      servico: 'TECHNICAL_ASSISTANCE',
       mensagem: ' Manutenção de notebook '
     });
   }
@@ -37,7 +39,7 @@ describe('BudgetFormComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('[aria-invalid="true"]').length).toBe(3);
     expect(fixture.nativeElement.querySelector('#nome-error').textContent).toContain('Informe seu nome');
     expect(fixture.nativeElement.querySelector('#telefone').getAttribute('aria-describedby')).toContain('telefone-error');
-    http.expectNone(COMPANY.formEndpoint);
+    http.expectNone('/api/v1/budgets');
   });
 
   it('rejeita nome com apenas espaços e telefone incompleto', () => {
@@ -45,7 +47,7 @@ describe('BudgetFormComponent', () => {
     component.budgetForm.patchValue({ nome: '   ', telefone: '9999' });
     component.submitBudget();
     expect(component.budgetForm.invalid).toBeTrue();
-    http.expectNone(COMPANY.formEndpoint);
+    http.expectNone('/api/v1/budgets');
   });
 
   it('aceita telefone fixo, celular e código do Brasil, mas rejeita letras', () => {
@@ -57,7 +59,7 @@ describe('BudgetFormComponent', () => {
     });
   });
 
-  it('envia os campos originais ao Formspree e impede envio duplicado', () => {
+  it('envia os campos à API e impede envio duplicado', () => {
     fillForm();
     component.submitBudget();
     component.submitBudget();
@@ -65,15 +67,14 @@ describe('BudgetFormComponent', () => {
     expect(fixture.nativeElement.querySelector('button').disabled).toBeTrue();
     expect(fixture.nativeElement.querySelector('fieldset').disabled).toBeTrue();
     expect(fixture.nativeElement.querySelector('[role="status"]').textContent).toContain('Enviando');
-    const request = http.expectOne(COMPANY.formEndpoint);
+    const request = http.expectOne('/api/v1/budgets');
     expect(request.request.method).toBe('POST');
-    expect(request.request.headers.get('Accept')).toBe('application/json');
-    expect(request.request.body.get('nome')).toBe('Cliente de teste');
-    expect(request.request.body.get('telefone')).toBe('(33) 99999-9999');
-    expect(request.request.body.get('servico')).toBe('Assistência técnica');
-    expect(request.request.body.get('mensagem')).toBe('Manutenção de notebook');
-    expect(request.request.body.get('_subject')).toBe('Novo Orçamento - Telemicro Informática');
-    request.flush({ ok: true });
+    expect(request.request.headers.get('Idempotency-Key')).toMatch(/^[a-z0-9-]{36}$/);
+    expect(request.request.body.customerName).toBe('Cliente de teste');
+    expect(request.request.body.phone).toBe('(33) 99999-9999');
+    expect(request.request.body.serviceCode).toBe('TECHNICAL_ASSISTANCE');
+    expect(request.request.body.message).toBe('Manutenção de notebook');
+    request.flush({ protocol: 'TM-TEST' });
     fixture.detectChanges();
     expect(component.submitting).toBeFalse();
     expect(component.success).toBeTrue();
@@ -85,7 +86,7 @@ describe('BudgetFormComponent', () => {
   it('preserva os dados na falha e permite uma nova tentativa', () => {
     fillForm();
     component.submitBudget();
-    http.expectOne(COMPANY.formEndpoint).flush({}, { status: 422, statusText: 'Unprocessable Entity' });
+    http.expectOne('/api/v1/budgets').flush({}, { status: 422, statusText: 'Unprocessable Entity' });
     fixture.detectChanges();
     expect(component.submitting).toBeFalse();
     expect(component.success).toBeFalse();
@@ -94,24 +95,40 @@ describe('BudgetFormComponent', () => {
     expect(fixture.nativeElement.querySelector('[role="alert"] a').href).toBe(COMPANY.whatsapp);
     component.submitBudget();
     expect(component.errorMessage).toBe('');
-    http.expectOne(COMPANY.formEndpoint).flush({ ok: true });
+    http.expectOne('/api/v1/budgets').flush({ protocol: 'TM-TEST' });
     expect(component.success).toBeTrue();
   });
 
   it('permite tentar novamente após falha de conexão', () => {
     fillForm();
     component.submitBudget();
-    http.expectOne(COMPANY.formEndpoint).error(new ProgressEvent('error'));
+    http.expectOne('/api/v1/budgets').error(new ProgressEvent('error'));
     expect(component.submitting).toBeFalse();
     expect(component.errorMessage).toContain('Não foi possível confirmar');
     expect(component.budgetForm.valid).toBeTrue();
   });
 
-  it('encerra a espera após 20 segundos e mantém os dados', fakeAsync(() => {
+  it('reutiliza a chave após falha e troca a chave se os dados mudarem', () => {
+    fillForm(); component.submitBudget();
+    const first = http.expectOne('/api/v1/budgets');
+    const key = first.request.headers.get('Idempotency-Key');
+    first.error(new ProgressEvent('error'));
+    component.submitBudget();
+    const retry = http.expectOne('/api/v1/budgets');
+    expect(retry.request.headers.get('Idempotency-Key')).toBe(key);
+    retry.error(new ProgressEvent('error'));
+    component.budgetForm.controls.mensagem.setValue('Outro pedido');
+    component.submitBudget();
+    const changed = http.expectOne('/api/v1/budgets');
+    expect(changed.request.headers.get('Idempotency-Key')).not.toBe(key);
+    changed.flush({ protocol: 'TM-TEST' });
+  });
+
+  it('encerra a espera após 90 segundos e mantém os dados', fakeAsync(() => {
     fillForm();
     component.submitBudget();
-    const request = http.expectOne(COMPANY.formEndpoint);
-    tick(20001);
+    const request = http.expectOne('/api/v1/budgets');
+    tick(90001);
     expect(request.cancelled).toBeTrue();
     expect(component.submitting).toBeFalse();
     expect(component.errorMessage).toContain('Não foi possível confirmar');

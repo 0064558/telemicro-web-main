@@ -2,6 +2,10 @@
 
 Landing page em Angular 20 standalone para a loja de informática em São João Evangelista, MG.
 
+## Backend de orçamentos
+
+A API Java/Spring Boot está em [`backend/`](backend/README.md), com PostgreSQL, Flyway, pedidos com protocolo/idempotência, JWT via Spring Security e gestão administrativa com permissões ADMIN/DEMO. O formulário e o painel Angular já estão integrados. Consulte o [planejamento e roadmap](docs/PLANEJAMENTO.md). A próxima etapa prepara Docker, dados de demonstração e hospedagem.
+
 ## Executar
 
 Use Node.js compatível com Angular 20 (o projeto foi verificado com Node 24) e npm.
@@ -19,11 +23,17 @@ npm run build
 
 Os arquivos prontos ficam em `dist/telemicro-web/browser`. A entrada da aplicação é `src/index.html`. O antigo site estático na raiz e seus arquivos duplicados foram removidos. Este trabalho não inclui publicação.
 
+Para usar o formulário e o painel, inicie o banco e a API seguindo `backend/README.md`, depois execute `npm start`. O proxy de desenvolvimento encaminha `/api` para `http://localhost:8080`; não é necessário alterar CORS para esse fluxo. Entre em `http://localhost:4200/admin` com `admin@telemicro.local` e a senha de `backend/.env.local` criada pelo script local. Esse arquivo é ignorado pelo Git.
+
+`API_URL` em `src/app/core/api.ts` define a base pública da API (padrão `/api/v1`). Na publicação, configure a URL HTTPS da API Render ou um encaminhamento equivalente na Vercel; o proxy de desenvolvimento não faz parte do build. URLs, e não segredos, podem estar no frontend. A configuração de publicação será entregue na etapa 5.
+
 ## Organização
 
 - `src/app/pages/home/`: apresentação, serviços, loja, atendimento e contato.
 - `src/app/components/`: cabeçalho com menu responsivo, rodapé, ícones SVG e formulário de orçamento.
-- `src/app/core/company.ts`: telefone, WhatsApp, e-mail, endereço, link do mapa e endpoint do Formspree.
+- `src/app/core/company.ts`: telefone, WhatsApp, e-mail, endereço e link do mapa.
+- `src/app/pages/admin/`: login e painel responsivo, carregados sob demanda.
+- `src/app/core/auth.service.ts`: sessão em memória, proteção das rotas e autorização HTTP.
 - `src/styles.css`: paleta, tipografia, espaçamentos, botões e regras de acessibilidade compartilhadas.
 - `src/assets/img/`: imagens originais e versões otimizadas usadas na página.
 
@@ -41,15 +51,24 @@ O link do Google Maps pesquisa o endereço completo, sem coordenadas ou identifi
 
 ## Formulário
 
-O endpoint existente permanece `https://formspree.io/f/xeowyana`, recebendo `nome`, `telefone`, `servico`, `mensagem` e `_subject` por POST com FormData e resposta JSON.
+O catálogo vem de GET `/api/v1/services`. O envio usa POST `/api/v1/budgets` com JSON (`customerName`, `phone`, `serviceCode`, `message`) e `Idempotency-Key`. A confirmação mostra o protocolo retornado pela API. Formspree foi removido desse fluxo.
 
 - Nome, telefone com DDD e serviço são obrigatórios.
 - Campos e botão são bloqueados durante o envio, com aviso acessível.
 - Sucesso limpa os campos e mantém a confirmação visível.
-- Erro ou espera acima de 20 segundos preserva os dados e oferece nova tentativa ou WhatsApp.
+- Erro ou espera acima de 90 segundos preserva os dados e oferece nova tentativa ou WhatsApp. O prazo acomoda a inicialização da hospedagem gratuita.
+- Repetir o mesmo conteúdo após falha reutiliza a chave, evitando duplicação; mudar o conteúdo gera uma nova chave. A chave fica na memória desta página, e a API garante idempotência por 24 horas.
 - A assinatura é cancelada se o componente for destruído.
 
-Os testes usam o backend HTTP simulado do Angular: não enviam mensagens reais. A entrega de e-mail continua dependendo da configuração e disponibilidade da conta Formspree existente.
+Os testes usam HTTP simulado do Angular: não criam pedidos reais. Os pedidos ficam no PostgreSQL e aparecem no painel; não há envio de e-mail nesta etapa.
+
+## Painel administrativo
+
+Login em `/admin/login`, painel em `/admin`. O JWT fica somente na memória, sem localStorage, sessionStorage ou cookies. Recarregar a página exige novo login. Expiração ou HTTP 401 encerra a sessão; Sair remove o token local. O servidor valida as permissões em cada requisição.
+
+O painel oferece busca, filtros por status/serviço e período, ordenação, paginação de 20 pedidos, contagens dos filtros, detalhes, histórico e observações. Datas do filtro usam o fuso local do navegador, incluindo o dia final inteiro. Contas ADMIN podem alterar status e adicionar observações; reabrir um pedido exige motivo. HTTP 409 atualiza os dados e preserva o texto para revisão. Após falha de conexão em uma alteração, atualize os detalhes antes de repetir a ação.
+
+Contas DEMO têm somente leitura de dados explicitamente fictícios. A criação da conta DEMO e desses pedidos faz parte da etapa 5; novos pedidos públicos nunca aparecem nesse acesso.
 
 ## Verificação
 

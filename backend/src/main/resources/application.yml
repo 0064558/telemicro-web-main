@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: telemicro-api
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
+      connection-timeout: 10000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    clean-disabled: true
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: none
+  error:
+    include-message: never
+    include-stacktrace: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+app:
+  demo-enabled: ${DEMO_ENABLED:false}
+  security:
+    jwt-secret: ${JWT_SECRET:}
+    issuer: ${JWT_ISSUER:telemicro-api}
+    audience: telemicro-admin
+    token-ttl-seconds: 1800
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+    login-limit: ${LOGIN_RATE_LIMIT:10}
+    submission-limit: ${SUBMISSION_RATE_LIMIT:20}
+    rate-window-seconds: 900
+    max-rate-keys: 10000
+  bootstrap:
+    enabled: ${BOOTSTRAP_ENABLED:false}
+    admin-email: ${BOOTSTRAP_ADMIN_EMAIL:}
+    admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}
+    demo-email: ${BOOTSTRAP_DEMO_EMAIL:}
+    demo-password: ${BOOTSTRAP_DEMO_PASSWORD:}

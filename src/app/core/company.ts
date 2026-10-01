@@ -5,6 +5,5 @@ export const COMPANY = {
   street: 'Rua Benedito Valadares, 78',
   city: 'São João Evangelista — MG',
   maps: 'https://www.google.com/maps/search/?api=1&query=' +
-    encodeURIComponent('Rua Benedito Valadares, 78, São João Evangelista, MG, Brasil'),
-  formEndpoint: 'https://formspree.io/f/xeowyana'
+    encodeURIComponent('Rua Benedito Valadares, 78, São João Evangelista, MG, Brasil')
 } as const;

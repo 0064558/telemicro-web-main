@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { FooterComponent } from './components/footer.component';
 import { HeaderComponent } from './components/header.component';
 import { ParticleBackgroundComponent } from './components/particle-background.component';
@@ -11,13 +11,15 @@ import { FloatingWhatsappComponent } from './components/floating-whatsapp.compon
   imports: [RouterOutlet, HeaderComponent, FooterComponent, ParticleBackgroundComponent, FloatingWhatsappComponent],
   template: `
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
-    <app-particle-background />
+    @if (!adminPage) { <app-particle-background /> }
     <div class="site-shell">
-      <app-header />
+      @if (!adminPage) { <app-header /> }
       <main id="conteudo" tabindex="-1"><router-outlet /></main>
-      <app-footer />
-      <app-floating-whatsapp />
+      @if (!adminPage) { <app-footer /><app-floating-whatsapp /> }
     </div>
   `
 })
-export class AppComponent {}
+export class AppComponent {
+  private readonly router = inject(Router);
+  get adminPage(): boolean { return this.router.url.startsWith('/admin'); }
+}
