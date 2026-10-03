@@ -126,7 +126,7 @@ h1 > span { background: linear-gradient(100deg, var(--cyan) 0%, #48baf0 68%, #f0
 .hero::after { content: ''; position: absolute; z-index: 1; width: 720px; height: 720px; right: -240px; top: -270px; border-radius: 50%; background: radial-gradient(circle at 42% 58%, rgba(0,187,238,.2), rgba(22,127,209,.08) 40%, transparent 67%); filter: blur(8px); pointer-events: none; }
 .hero-grid { position: relative; z-index: 2; }
 .status-dot { box-shadow: 0 0 0 0 rgba(117,235,231,.5); }
-.hero-visual { position: relative; transform: perspective(1000px) rotateY(-1.5deg) rotateZ(.35deg); border-color: rgba(99,227,255,.32); box-shadow: 0 34px 80px rgba(0,8,22,.4), -18px 8px 55px rgba(0,105,193,.16), 0 0 0 8px rgba(99,227,255,.025), inset 0 0 0 1px rgba(255,255,255,.03); }
+.hero-visual { position: relative; transform: none; border-color: rgba(99,227,255,.32); box-shadow: 0 34px 80px rgba(0,8,22,.4), -18px 8px 55px rgba(0,105,193,.16), 0 0 0 8px rgba(99,227,255,.025), inset 0 0 0 1px rgba(255,255,255,.03); }
 .hero-photo::after { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(117,235,231,.04) 1px, transparent 1px); background-size: 100% 5px; mix-blend-mode: screen; }
 .hero-photo img { transition: transform 800ms cubic-bezier(.2,.8,.2,1), filter 500ms ease; }
 .hero-visual:hover .hero-photo img { transform: scale(1.035); filter: contrast(1.04) saturate(1.08); }

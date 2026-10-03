@@ -10,7 +10,7 @@
     </fieldset>
     <p class="form-privacy">* Campos obrigatórios. Os dados serão armazenados para atender à sua solicitação de orçamento.</p>
     @if (catalogLoading) { <p role="status">Carregando serviços… A primeira conexão pode demorar.</p> }
-    @if (catalogError) { <p role="alert">{{ catalogError }}</p><button type="button" (click)="loadServices()">Tentar carregar serviços</button> }
+    @if (catalogError) { <p role="alert">{{ catalogError }}</p><button class="button button-small retry-button" type="button" (click)="loadServices()">Tentar carregar serviços</button> }
     <button class="button submit-button" type="submit" [disabled]="submitting || catalogLoading || !options.length">{{ submitting ? 'Enviando orçamento…' : 'Enviar pedido de orçamento' }}<app-icon name="arrow" /></button>
   </form>
   <div class="form-status" role="status" aria-live="polite" aria-atomic="true">
