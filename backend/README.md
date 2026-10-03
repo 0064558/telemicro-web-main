@@ -18,7 +18,7 @@ docker compose up -d --wait
 
 Em Linux/macOS, configure as variáveis descritas abaixo e use `./mvnw spring-boot:run -Dspring-boot.run.profiles=local`. O perfil local também pode iniciar sem chave configurada, gerando uma chave temporária que invalida tokens ao reiniciar; não cria usuário automaticamente.
 
-A API usa a porta 8080. O PostgreSQL fica acessível apenas nesta máquina em `localhost:55432`, banco/usuário `telemicro`, senha `telemicro_local_only`. São credenciais públicas exclusivamente locais; não reutilizar em hospedagem. A porta 55432 evita conflito com os outros bancos locais já existentes nesta máquina.
+A API usa a porta 8080. O PostgreSQL fica acessível apenas nesta máquina em `localhost:15432`, banco/usuário `telemicro`, senha `telemicro_local_only`. São credenciais públicas exclusivamente locais; não reutilizar em hospedagem. A porta 15432 evita conflito com os outros bancos locais já existentes nesta máquina.
 
 Verificar saúde:
 

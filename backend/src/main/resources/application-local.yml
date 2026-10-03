@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:55432/telemicro}
+    url: ${DB_URL:jdbc:postgresql://localhost:15432/telemicro}
     username: ${DB_USERNAME:telemicro}
     password: ${DB_PASSWORD:telemicro_local_only}
 app:

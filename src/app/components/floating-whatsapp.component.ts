@@ -34,6 +34,27 @@ import { COMPANY } from '../core/company';
       box-shadow: 0 14px 34px rgba(0,0,0,.34);
     }
     .whatsapp-float svg { width: 34px; height: 34px; }
+    .whatsapp-float::before, .whatsapp-float::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border: 1px solid rgba(37,211,102,.5);
+      border-radius: inherit;
+      background: rgba(37,211,102,.12);
+      box-shadow: 0 0 18px rgba(37,211,102,.25);
+      pointer-events: none;
+      opacity: 0;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .whatsapp-float::before, .whatsapp-float::after {
+        animation: whatsapp-aura 3s ease-out infinite;
+      }
+      .whatsapp-float::after { animation-delay: 1.5s; }
+      @keyframes whatsapp-aura {
+        0% { transform: scale(1); opacity: .65; }
+        75%, 100% { transform: scale(1.5); opacity: 0; }
+      }
+    }
     @media (max-width: 520px) {
       .whatsapp-float {
         right: max(16px, env(safe-area-inset-right));
