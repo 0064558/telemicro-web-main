@@ -8,12 +8,13 @@ if (-not (Test-Path -LiteralPath $configPath)) {
 & docker compose -f (Join-Path $backendPath 'compose.yaml') up -d --wait postgres
 if ($LASTEXITCODE -ne 0) { throw 'Não foi possível preparar o banco. Confira se o Docker Desktop está aberto e a porta 15432 está disponível.' }
 $allowedKeys = @('JWT_SECRET', 'BOOTSTRAP_ENABLED', 'BOOTSTRAP_ADMIN_EMAIL', 'BOOTSTRAP_ADMIN_PASSWORD',
-    'BOOTSTRAP_DEMO_EMAIL', 'BOOTSTRAP_DEMO_PASSWORD', 'DEMO_ENABLED', 'CORS_ALLOWED_ORIGINS')
+    'BOOTSTRAP_DEMO_EMAIL', 'BOOTSTRAP_DEMO_PASSWORD', 'DEMO_ENABLED', 'CORS_ALLOWED_ORIGINS',
+    'MAIL_ENABLED', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM', 'MAIL_TO', 'MAIL_PANEL_URL')
 $previous = @{}
 try {
     foreach ($line in Get-Content -LiteralPath $configPath) {
         if ([string]::IsNullOrWhiteSpace($line) -or $line.StartsWith('#')) { continue }
-        $parts = $line.Split(@('='), 2)
+        $parts = $line -split '=', 2
         if ($parts.Length -ne 2 -or $allowedKeys -notcontains $parts[0]) {
             throw 'Configuração local inválida: use somente as variáveis documentadas, sem comandos.'
         }

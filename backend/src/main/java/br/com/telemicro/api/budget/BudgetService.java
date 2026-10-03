@@ -17,10 +17,13 @@ import java.util.UUID;
 public class BudgetService {
     private final ServiceTypeRepository services;
     private final BudgetWriteRepository budgets;
+    private final br.com.telemicro.api.notification.BudgetNotifications notifications;
 
-    public BudgetService(ServiceTypeRepository services, BudgetWriteRepository budgets) {
+    public BudgetService(ServiceTypeRepository services, BudgetWriteRepository budgets,
+                         br.com.telemicro.api.notification.BudgetNotifications notifications) {
         this.services = services;
         this.budgets = budgets;
+        this.notifications = notifications;
     }
 
     @Transactional(timeout = 15)
@@ -58,6 +61,7 @@ public class BudgetService {
             if (budgets.insertBudget(id, protocol, name, phone, service.getId(), message, now)) {
                 budgets.insertInitialHistory(id, now);
                 budgets.remember(key, hash, id, now.plus(24, ChronoUnit.HOURS));
+                notifications.enqueue(id, protocol, service.getName());
                 return new BudgetCreatedResponse(protocol, now);
             }
         }

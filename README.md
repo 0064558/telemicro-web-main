@@ -60,7 +60,7 @@ O catálogo vem de GET `/api/v1/services`. O envio usa POST `/api/v1/budgets` co
 - Repetir o mesmo conteúdo após falha reutiliza a chave, evitando duplicação; mudar o conteúdo gera uma nova chave. A chave fica na memória desta página, e a API garante idempotência por 24 horas.
 - A assinatura é cancelada se o componente for destruído.
 
-Os testes usam HTTP simulado do Angular: não criam pedidos reais. Os pedidos ficam no PostgreSQL e aparecem no painel; não há envio de e-mail nesta etapa.
+Os testes usam HTTP simulado do Angular: não criam pedidos reais. Os pedidos ficam no PostgreSQL e aparecem no painel. O backend oferece avisos por e-mail opcionais, com fila persistente e novas tentativas; consulte `backend/README.md` para configurar.
 
 ## Painel administrativo
 

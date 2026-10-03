@@ -8,7 +8,17 @@ Requisitos: JDK 21 ou superior, Docker Desktop em execução e acesso à interne
 
 Para iniciar com um único comando, na raiz do projeto, execute `./backend/scripts/Start-Local.ps1`. O script cria a configuração local se necessário, inicia o banco, aguarda seu healthcheck e executa a API. Para executar pelo IntelliJ, o banco ainda precisa estar pronto antes de usar Run.
 
-## Backup e restauração local
+## Avisos de novos orçamentos por e-mail
+
+Na raiz, execute `./backend/scripts/Configure-Mail.ps1`. A senha de aplicativo é solicitada com entrada oculta e salva somente em `backend/.env.local`, ignorado pelo Git. O script configura o remetente `rodrigogggg12@gmail.com`, destinatário `rodrigodois9@gmail.com` e SMTP Gmail com STARTTLS obrigatório. Reinicie com `./backend/scripts/Start-Local.ps1`.
+
+No IntelliJ: recarregue o projeto Maven e configure as variáveis `MAIL_*` de `.env.local` na execução; o Spring não lê o arquivo automaticamente. Não coloque credenciais em configurações da IDE versionadas. Para produção, use segredos do provedor e ajuste `MAIL_PANEL_URL` para o painel publicado.
+
+Notificações ficam desativadas por padrão. Quando ativadas, apenas novos pedidos geram avisos; pedidos anteriores não são notificados retroativamente. A migração V5 cria uma fila no mesmo banco e na mesma transação do orçamento. Um processo em segundo plano tenta enviar um aviso a cada 15 segundos, sem bloquear o formulário, e repete falhas após 5 minutos. O aviso contém protocolo, serviço e link do painel, sem nome, telefone ou mensagem do cliente. Os testes usam envio simulado e nunca enviam e-mails reais.
+
+Reiniciar a API preserva avisos pendentes. SMTP não garante envio exatamente uma vez: uma interrupção após o provedor aceitar o e-mail e antes de registrar o sucesso pode causar um aviso repetido. O protocolo identifica o mesmo pedido. Não é necessário reenviar o formulário para repetir uma notificação. A entrega na caixa de entrada precisa ser conferida após inserir a senha e iniciar a API; uma resposta SMTP de sucesso não garante entrega final.
+
+## Executar backup e restauração
 
 Com o banco em execução, na raiz do projeto:
 

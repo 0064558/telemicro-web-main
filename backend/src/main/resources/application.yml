@@ -1,6 +1,19 @@
 spring:
   application:
     name: telemicro-api
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.ssl.checkserveridentity: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -34,6 +47,11 @@ management:
       show-details: never
       show-components: never
 app:
+  notifications:
+    enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:}
+    to: ${MAIL_TO:}
+    panel-url: ${MAIL_PANEL_URL:http://localhost:4200/admin}
   demo-enabled: ${DEMO_ENABLED:false}
   security:
     jwt-secret: ${JWT_SECRET:}

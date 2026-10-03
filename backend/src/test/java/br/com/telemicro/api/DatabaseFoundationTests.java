@@ -26,7 +26,7 @@ class DatabaseFoundationTests {
     @Test
     void migrationsCreateSchemaAndCatalogWithoutAdministrativeCredentials() {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE success", Integer.class))
-                .isEqualTo(4);
+                .isEqualTo(5);
         assertThat(jdbc.queryForList("SELECT name FROM service_types ORDER BY display_order", String.class))
                 .containsExactly("Assistência técnica", "Equipamentos e acessórios", "Recarga de cartuchos e toner",
                         "Suporte presencial ou online", "Locação de equipamentos", "Manutenção preventiva", "Outro assunto");
