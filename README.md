@@ -72,6 +72,8 @@ Contas DEMO têm somente leitura de dados explicitamente fictícios. A criação
 
 ## Verificação
 
+O workflow `.github/workflows/checks.yml` executa testes e build do frontend e `verify` do backend em pushes e pull requests. Os testes do backend usam PostgreSQL isolado via Testcontainers. A execução automática começa após enviar esse arquivo ao GitHub; não acessa o banco da loja.
+
 ```bash
 npm test -- --watch=false --browsers=ChromeHeadless
 npm run build

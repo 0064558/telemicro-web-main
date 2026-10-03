@@ -3,8 +3,10 @@ $ErrorActionPreference = 'Stop'
 $backendPath = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $configPath = Join-Path $backendPath '.env.local'
 if (-not (Test-Path -LiteralPath $configPath)) {
-    throw 'Execute primeiro .\scripts\Initialize-LocalConfig.ps1 para gerar as credenciais locais.'
+    & (Join-Path $PSScriptRoot 'Initialize-LocalConfig.ps1')
 }
+& docker compose -f (Join-Path $backendPath 'compose.yaml') up -d --wait postgres
+if ($LASTEXITCODE -ne 0) { throw 'Não foi possível preparar o banco. Confira se o Docker Desktop está aberto e a porta 15432 está disponível.' }
 $allowedKeys = @('JWT_SECRET', 'BOOTSTRAP_ENABLED', 'BOOTSTRAP_ADMIN_EMAIL', 'BOOTSTRAP_ADMIN_PASSWORD',
     'BOOTSTRAP_DEMO_EMAIL', 'BOOTSTRAP_DEMO_PASSWORD', 'DEMO_ENABLED', 'CORS_ALLOWED_ORIGINS')
 $previous = @{}

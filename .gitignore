@@ -7,3 +7,5 @@ out-tsc/
 .env.*
 !.env.example
 backend/.local-m2/
+backend/backups/
+*.dump

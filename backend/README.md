@@ -6,6 +6,21 @@ API de orçamentos: Java 21, Spring Boot 4.1.1, Spring Security com JWT, Maven W
 
 Requisitos: JDK 21 ou superior, Docker Desktop em execução e acesso à internet no primeiro build.
 
+Para iniciar com um único comando, na raiz do projeto, execute `./backend/scripts/Start-Local.ps1`. O script cria a configuração local se necessário, inicia o banco, aguarda seu healthcheck e executa a API. Para executar pelo IntelliJ, o banco ainda precisa estar pronto antes de usar Run.
+
+## Backup e restauração local
+
+Com o banco em execução, na raiz do projeto:
+
+```powershell
+./backend/scripts/Backup-Local.ps1
+./backend/scripts/Restore-Local.ps1 -BackupPath './backend/backups/ARQUIVO.dump'
+```
+
+O backup usa o formato custom do PostgreSQL, inclui estrutura e dados e fica em `backend/backups/`, ignorado pelo Git. O script de restauração cria um banco separado com prefixo `telemicro_restore_`, recusa sobrescrever bancos existentes e preserva o banco principal. Não substitui automaticamente o banco usado pela API. Confira pedidos, histórico e migrações no banco restaurado antes de planejar uma recuperação real.
+
+Para operação real: definir backup diário, retenção inicial de 7 cópias diárias e 4 semanais e uma cópia protegida fora da máquina/servidor. Esses arquivos contêm dados dos clientes e hashes de credenciais; restringir o acesso. Testar a restauração periodicamente. Agendamento e cópia externa serão configurados conforme o banco e a hospedagem escolhidos.
+
 No PowerShell, dentro de `backend/`:
 
 ```powershell
