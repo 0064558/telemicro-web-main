@@ -9,3 +9,4 @@ out-tsc/
 backend/.local-m2/
 backend/backups/
 *.dump
+video-edit/

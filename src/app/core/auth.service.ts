@@ -30,6 +30,16 @@ export class AuthService {
       this.timer = setTimeout(() => this.logout(true), result.expiresIn * 1000);
     }));
   }
+
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.http.post<void>(
+      `${this.api}/auth/change-password`,
+      { currentPassword, newPassword }
+    )
+      // Pipe serve para encadear operadores de transformação e manipulação de fluxo de dados em observáveis. Aqui, ele é usado para aplicar um tempo limite à solicitação HTTP.
+      .pipe(timeout(15000));
+  }
+
   logout(expired = false): void {
     clearTimeout(this.timer);
     this.token = '';
@@ -39,10 +49,15 @@ export class AuthService {
   }
 }
 export const adminGuard: CanActivateFn = () => inject(AuthService).accessToken ? true : inject(Router).createUrlTree(['/admin/login']);
+
+
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const auth = inject(AuthService);
   const api = inject(API_URL);
-  const protectedRequest = request.url.startsWith(`${api}/admin/`) || request.url === `${api}/auth/me`;
+  const protectedRequest =
+    request.url.startsWith(`${api}/admin/`) ||
+    request.url === `${api}/auth/me` ||
+    request.url === `${api}/auth/change-password`;
   const token = protectedRequest ? auth.accessToken : '';
   return next(token ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : request).pipe(catchError(error => {
     if (protectedRequest && error.status === 401) auth.logout(true);

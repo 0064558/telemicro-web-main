@@ -1,64 +1,179 @@
 <section class="admin-shell">
-  <header><div><a routerLink="/">← Voltar ao site</a><p class="dashboard-eyebrow">TELEMICRO / GESTÃO</p><h1>Painel de atendimento</h1><p>{{ auth.user()?.email }}</p></div><button (click)="auth.logout()">Sair</button></header>
-  @if (auth.user()?.role === 'DEMO') { <p class="notice">Demonstração: dados fictícios e acesso somente de leitura.</p> }
+  <header>
+    <div><a routerLink="/">← Voltar ao site</a>
+      <p class="dashboard-eyebrow">TELEMICRO / GESTÃO</p>
+      <h1>Painel de atendimento</h1>
+      <p>{{ auth.user()?.email }}</p>
+      <div class="actions">
+        @if (auth.user()?.role === 'ADMIN') {
+        <button type="button" (click)="showChangePassword = !showChangePassword"
+          [attr.aria-expanded]="showChangePassword" aria-controls="change-password-panel">
+          {{ showChangePassword ? 'Fechar alteração de senha' : 'Alterar senha' }}
+        </button>
+        }
+      </div>
+
+      <div class="actions"></div>
+        <button type="button" (click)="auth.logout()">Sair</button>
+    </div>
+  </header>
+
+  @if (auth.user()?.role === 'ADMIN') {
+  <div id="change-password-panel">
+    @if (showChangePassword) {
+    <app-change-password />
+    }
+  </div>
+  }
+
+  @if (auth.user()?.role === 'DEMO') { <p class="notice">Demonstração: dados fictícios e acesso somente de leitura.</p>
+  }
   <form class="filters" [formGroup]="filters" (ngSubmit)="load()">
     <label>Buscar cliente ou protocolo<input formControlName="q" maxlength="100" type="search" /></label>
-    <label>Status<select formControlName="status"><option value="">Todos</option>@for (status of statuses; track status) { <option [value]="status">{{ labels[status] }}</option> }</select></label>
-    <label>Serviço<select formControlName="serviceCode"><option value="">Todos</option>@for (service of services; track service.code) { <option [value]="service.code">{{ service.name }}</option> }</select></label>
-    <label>Desde<input type="date" formControlName="from" /></label><label>Até (inclusive)<input type="date" formControlName="to" /></label>
-    <label>Ordenar<select formControlName="sort"><option value="NEWEST">Mais recentes</option><option value="OLDEST">Mais antigos</option></select></label>
+    <label>Status<select formControlName="status">
+        <option value="">Todos</option>@for (status of statuses; track status) { <option [value]="status">{{
+          labels[status] }}</option> }
+      </select></label>
+    <label>Serviço<select formControlName="serviceCode">
+        <option value="">Todos</option>@for (service of services; track service.code) { <option [value]="service.code">
+          {{ service.name }}</option> }
+      </select></label>
+    <label>Desde<input type="date" formControlName="from" /></label><label>Até (inclusive)<input type="date"
+        formControlName="to" /></label>
+    <label>Ordenar<select formControlName="sort">
+        <option value="NEWEST">Mais recentes</option>
+        <option value="OLDEST">Mais antigos</option>
+      </select></label>
     <button class="button" [disabled]="busy" type="submit">Aplicar filtros</button>
     <button type="button" (click)="resetFilters()" [disabled]="busy">Limpar filtros</button>
   </form>
   @if (error) { <p class="error" role="alert">{{ error }}</p> }
   @if (busy) { <p role="status">Carregando orçamentos…</p> }
   <section class="overview" aria-label="Visão geral" [attr.aria-busy]="busy">
-    <div class="section-title"><div><h2>Visão geral</h2><p>Indicadores de todos os pedidos nos filtros selecionados.</p></div><span class="total-pill">{{ busy ? 'Atualizando…' : total + ' pedidos' }}</span></div>
+    <div class="section-title">
+      <div>
+        <h2>Visão geral</h2>
+        <p>Indicadores de todos os pedidos nos filtros selecionados.</p>
+      </div><span class="total-pill">{{ busy ? 'Atualizando…' : total + ' pedidos' }}</span>
+    </div>
     <div class="cards">@for (status of statuses; track status) {
-      <button class="metric" [attr.data-status]="status" [class.selected]="filters.controls.status.value === status" [attr.aria-pressed]="filters.controls.status.value === status" [disabled]="busy" (click)="filterStatus(status)">
-        <span>{{ labels[status] }}</span><strong>{{ busy ? '—' : (counts[status] ?? 0) }}</strong><small>{{ busy ? 'Atualizando' : percent(counts[status] ?? 0) + '% dos pedidos' }}</small>
+      <button class="metric" [attr.data-status]="status" [class.selected]="filters.controls.status.value === status"
+        [attr.aria-pressed]="filters.controls.status.value === status" [disabled]="busy" (click)="filterStatus(status)">
+        <span>{{ labels[status] }}</span><strong>{{ busy ? '—' : (counts[status] ?? 0) }}</strong><small>{{ busy ?
+          'Atualizando' : percent(counts[status] ?? 0) + '% dos pedidos' }}</small>
       </button>
-    }</div>
+      }
+    </div>
     <div class="analytics-grid">
-      <article class="chart-card"><h2>Pedidos por serviço</h2><p>Distribuição por categoria de atendimento.</p>
+      <article class="chart-card">
+        <h2>Pedidos por serviço</h2>
+        <p>Distribuição por categoria de atendimento.</p>
         @if (busy) { <p class="empty-chart" role="status">Atualizando indicadores…</p> }
         @else { <div class="service-chart">@for (service of serviceCounts; track service.code) {
-          <button class="service-row" (click)="filterService(service.code)" [attr.aria-label]="service.name + ': ' + service.total + ' pedidos. Filtrar por este serviço.'">
-            <span class="bar-label"><span>{{ service.name }}</span><strong>{{ service.total }} <small>({{ percent(service.total) }}%)</small></strong></span>
-            <span class="bar-track" aria-hidden="true"><span [style.width.%]="serviceWidth(service.total)"></span></span>
+          <button class="service-row" (click)="filterService(service.code)"
+            [attr.aria-label]="service.name + ': ' + service.total + ' pedidos. Filtrar por este serviço.'">
+            <span class="bar-label"><span>{{ service.name }}</span><strong>{{ service.total }} <small>({{
+                  percent(service.total) }}%)</small></strong></span>
+            <span class="bar-track" aria-hidden="true"><span
+                [style.width.%]="serviceWidth(service.total)"></span></span>
           </button>
-        } @empty { <p class="empty-chart">Nenhum pedido para os filtros selecionados.</p> }</div> }
+          } @empty { <p class="empty-chart">Nenhum pedido para os filtros selecionados.</p> }
+        </div> }
       </article>
-      <article class="chart-card"><h2>Situação dos pedidos</h2><p>Acompanhe a distribuição do atendimento.</p>
+      <article class="chart-card">
+        <h2>Situação dos pedidos</h2>
+        <p>Acompanhe a distribuição do atendimento.</p>
         @if (busy) { <p class="empty-chart">Atualizando indicadores…</p> }
         @else if (total) {
-          <div class="status-chart"><div class="donut" [style.background]="statusGradient" aria-hidden="true"><div><strong>{{ total }}</strong><span>pedidos</span></div></div>
-          <ul class="chart-legend">@for (status of statuses; track status) { <li [attr.data-status]="status"><span class="legend-dot" aria-hidden="true"></span><span>{{ labels[status] }}</span><strong>{{ counts[status] ?? 0 }} <small>({{ percent(counts[status] ?? 0) }}%)</small></strong></li> }</ul></div>
+        <div class="status-chart">
+          <div class="donut" [style.background]="statusGradient" aria-hidden="true">
+            <div><strong>{{ total }}</strong><span>pedidos</span></div>
+          </div>
+          <ul class="chart-legend">@for (status of statuses; track status) { <li [attr.data-status]="status"><span
+                class="legend-dot" aria-hidden="true"></span><span>{{ labels[status] }}</span><strong>{{ counts[status]
+                ?? 0 }} <small>({{ percent(counts[status] ?? 0) }}%)</small></strong></li> }</ul>
+        </div>
         } @else { <p class="empty-chart">Nenhum pedido para os filtros selecionados.</p> }
       </article>
     </div>
   </section>
   @if (page; as result) {
-    <div class="table-wrap"><table><caption>{{ total }} pedido(s) nos filtros selecionados</caption><thead><tr><th scope="col">Cliente</th><th scope="col">Serviço</th><th scope="col">Status</th><th scope="col">Recebido em</th><th scope="col">Ação</th></tr></thead><tbody>
-    @for (budget of result.content; track budget.id) { <tr><td>{{ budget.customerName }}<small>{{ budget.phone }}</small></td><td>{{ budget.serviceName }}</td><td><span class="status-badge" [attr.data-status]="budget.status">{{ labels[budget.status] }}</span></td><td>{{ budget.createdAt | date:'dd/MM/yyyy HH:mm' }}</td><td><button [disabled]="saving" (click)="open(budget.id)">Ver detalhes<span class="sr-only"> de {{ budget.customerName }}</span></button></td></tr> }
-    </tbody></table></div>
-    @if (!result.content.length) { <p role="status">Nenhum orçamento encontrado.</p> }
-    <nav class="pager" aria-label="Páginas de orçamentos"><button [disabled]="busy || result.page === 0" (click)="load(result.page - 1)">Anterior</button><span>Página {{ result.page + 1 }} de {{ result.totalPages || 1 }}</span><button [disabled]="busy || result.page + 1 >= result.totalPages" (click)="load(result.page + 1)">Próxima</button></nav>
+  <div class="table-wrap">
+    <table>
+      <caption>{{ total }} pedido(s) nos filtros selecionados</caption>
+      <thead>
+        <tr>
+          <th scope="col">Cliente</th>
+          <th scope="col">Serviço</th>
+          <th scope="col">Status</th>
+          <th scope="col">Recebido em</th>
+          <th scope="col">Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (budget of result.content; track budget.id) { <tr>
+          <td>{{ budget.customerName }}<small>{{ budget.phone }}</small></td>
+          <td>{{ budget.serviceName }}</td>
+          <td><span class="status-badge" [attr.data-status]="budget.status">{{ labels[budget.status] }}</span></td>
+          <td>{{ budget.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td><button [disabled]="saving" (click)="open(budget.id)">Ver detalhes<span class="sr-only"> de {{
+                budget.customerName }}</span></button></td>
+        </tr> }
+      </tbody>
+    </table>
+  </div>
+  @if (!result.content.length) { <p role="status">Nenhum orçamento encontrado.</p> }
+  <nav class="pager" aria-label="Páginas de orçamentos"><button [disabled]="busy || result.page === 0"
+      (click)="load(result.page - 1)">Anterior</button><span>Página {{ result.page + 1 }} de {{ result.totalPages || 1
+      }}</span><button [disabled]="busy || result.page + 1 >= result.totalPages"
+      (click)="load(result.page + 1)">Próxima</button></nav>
   }
   @if (detailBusy) { <p role="status">Carregando detalhes…</p> }
   @if (detailError) { <p class="error" role="alert">{{ detailError }}</p> }
   @if (notice) { <p class="notice" role="status">{{ notice }}</p> }
   @if (details; as d) {
-    <article class="detail" aria-label="Detalhes do orçamento"><div class="actions"><h2>{{ d.budget.customerName }}</h2><button [disabled]="saving" (click)="close()">Fechar detalhes</button></div>
-    <dl><dt>Protocolo</dt><dd>{{ d.budget.protocol }}</dd><dt>Telefone</dt><dd><a [href]="'tel:+' + d.budget.phone">{{ d.budget.phone }}</a></dd><dt>Serviço</dt><dd>{{ d.budget.serviceName }}</dd><dt>Status</dt><dd>{{ labels[d.budget.status] }}</dd><dt>Atualizado</dt><dd>{{ d.budget.updatedAt | date:'dd/MM/yyyy HH:mm' }}</dd></dl>
-    <h2>Solicitação</h2><p class="message">{{ d.budget.message || 'Sem mensagem adicional.' }}</p>
+  <article class="detail" aria-label="Detalhes do orçamento">
+    <div class="actions">
+      <h2>{{ d.budget.customerName }}</h2><button [disabled]="saving" (click)="close()">Fechar detalhes</button>
+    </div>
+    <dl>
+      <dt>Protocolo</dt>
+      <dd>{{ d.budget.protocol }}</dd>
+      <dt>Telefone</dt>
+      <dd><a [href]="'tel:+' + d.budget.phone">{{ d.budget.phone }}</a></dd>
+      <dt>Serviço</dt>
+      <dd>{{ d.budget.serviceName }}</dd>
+      <dt>Status</dt>
+      <dd>{{ labels[d.budget.status] }}</dd>
+      <dt>Atualizado</dt>
+      <dd>{{ d.budget.updatedAt | date:'dd/MM/yyyy HH:mm' }}</dd>
+    </dl>
+    <h2>Solicitação</h2>
+    <p class="message">{{ d.budget.message || 'Sem mensagem adicional.' }}</p>
     <button [disabled]="saving" (click)="open(d.budget.id)">Atualizar detalhes</button>
     @if (auth.user()?.role === 'ADMIN') {
-      <form [formGroup]="edit" (ngSubmit)="changeStatus()"><fieldset [disabled]="saving"><legend>Alterar status</legend><label>Novo status<select formControlName="status"><option value="">Selecione</option>@for (s of transitions(); track s) { <option [value]="s">{{ labels[s] }}</option> }</select></label><label>Motivo / observação (obrigatório para reabrir)<textarea formControlName="justification" maxlength="2000" rows="2"></textarea></label><button class="button" type="submit">{{ saving ? 'Salvando…' : 'Salvar status' }}</button></fieldset></form>
-      <form [formGroup]="edit" (ngSubmit)="addNote()"><fieldset [disabled]="saving"><legend>Observação interna</legend><label>Texto<textarea formControlName="note" maxlength="2000" rows="3" required></textarea></label><button type="submit">Adicionar observação</button></fieldset></form>
+    <form [formGroup]="edit" (ngSubmit)="changeStatus()">
+      <fieldset [disabled]="saving">
+        <legend>Alterar status</legend><label>Novo status<select formControlName="status">
+            <option value="">Selecione</option>@for (s of transitions(); track s) { <option [value]="s">{{ labels[s] }}
+            </option> }
+          </select></label><label>Motivo / observação (obrigatório para reabrir)<textarea
+            formControlName="justification" maxlength="2000" rows="2"></textarea></label><button class="button"
+          type="submit">{{ saving ? 'Salvando…' : 'Salvar status' }}</button>
+      </fieldset>
+    </form>
+    <form [formGroup]="edit" (ngSubmit)="addNote()">
+      <fieldset [disabled]="saving">
+        <legend>Observação interna</legend><label>Texto<textarea formControlName="note" maxlength="2000" rows="3"
+            required></textarea></label><button type="submit">Adicionar observação</button>
+      </fieldset>
+    </form>
     }
-    <h2>Histórico</h2><ol>@for (h of d.history; track h.id) { <li>{{ labels[h.newStatus] }} — {{ h.createdAt | date:'dd/MM/yyyy HH:mm' }}<small>{{ h.changedByEmail || 'Recebimento do pedido' }}</small></li> }</ol>
-    <h2>Observações internas</h2>@for (n of d.notes; track n.id) { <p class="note">{{ n.text }}</p><small>{{ n.authorEmail }} — {{ n.createdAt | date:'dd/MM/yyyy HH:mm' }}</small> } @empty { <p>Sem observações.</p> }
-    </article>
+    <h2>Histórico</h2>
+    <ol>@for (h of d.history; track h.id) { <li>{{ labels[h.newStatus] }} — {{ h.createdAt | date:'dd/MM/yyyy HH:mm'
+        }}<small>{{ h.changedByEmail || 'Recebimento do pedido' }}</small></li> }</ol>
+    <h2>Observações internas</h2>@for (n of d.notes; track n.id) { <p class="note">{{ n.text }}</p><small>{{
+      n.authorEmail }} — {{ n.createdAt | date:'dd/MM/yyyy HH:mm' }}</small> } @empty { <p>Sem observações.</p> }
+  </article>
   }
 </section>

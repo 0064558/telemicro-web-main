@@ -6,23 +6,30 @@ import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, finalize, forkJoin, timeout } from 'rxjs';
 import { API_URL, BudgetDetails, BudgetPage, ServiceOption, Status, STATUS_LABELS, apiError } from '../../core/api';
+import { ChangePassword } from './change-password/change-password';
 import { AuthService } from '../../core/auth.service';
-@Component({ standalone: true, imports: [ReactiveFormsModule, DatePipe, RouterLink], templateUrl: './admin.component.html', styleUrl: './admin.css' })
+@Component({ standalone: true, imports: [ReactiveFormsModule, DatePipe, RouterLink, ChangePassword], templateUrl: './admin.component.html', styleUrl: './admin.css' })
 export class AdminComponent {
   readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly api = inject(API_URL);
   private readonly destroy = inject(DestroyRef);
+
   readonly labels = STATUS_LABELS;
   readonly statuses = Object.keys(STATUS_LABELS) as Status[];
   readonly filters = inject(FormBuilder).nonNullable.group({ q: '', status: '', serviceCode: '', from: '', to: '', sort: 'NEWEST' });
   readonly edit = inject(FormBuilder).nonNullable.group({ status: '', justification: '', note: '' });
+
   services: ServiceOption[] = []; page?: BudgetPage; details?: BudgetDetails;
   counts: Partial<Record<Status, number>> = {}; total = 0;
   serviceCounts: { code: string; name: string; total: number }[] = [];
   busy = false; detailBusy = false; saving = false; error = ''; detailError = ''; notice = '';
+
   private listRequest?: Subscription;
   private detailRequest?: Subscription;
+
+  showChangePassword = false;
+
   constructor() {
     this.http.get<ServiceOption[]>(`${this.api}/services`).pipe(timeout(90000), takeUntilDestroyed(this.destroy)).subscribe({ next: s => this.services = s, error: () => this.error = 'Não foi possível carregar os serviços. Atualize a página para tentar novamente.' });
     this.load();
