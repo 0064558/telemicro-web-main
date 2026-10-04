@@ -51,10 +51,87 @@ public class AuthService {
         return new LoginResponse(token, "Bearer", properties.tokenTtlSeconds(), profile(user.get()));
     }
 
+    // Esse record representa a requisição de alteração de senha, contendo a senha atual e a nova senha.
+    public record ChangePasswordRequest(
+            @NotBlank(message = "Informe a senha atual.")
+            @Size(max = 72)
+            String currentPassword,
+
+            @NotBlank(message = "Informe a nova senha.")
+            @Size(min = 12, max = 72, message = "A nova senha deve ter entre 12 e 72 caracteres.")
+            String newPassword
+    ) {}
+
     public UserResponse me(UUID id) {
         return profile(users.findById(id).filter(AdminUser::active)
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Sessão inválida.")));
     }
+
+    // O método changePassword permite que um usuário altere sua senha.
+    //  Ele verifica se a senha atual fornecida corresponde à senha armazenada,
+    //  se a nova senha é diferente da atual e se ambas as senhas estão dentro do limite de bytes UTF-8.
+    //  Se todas as condições forem atendidas, ele atualiza a senha no banco de dados.
+    public void changePassword(UUID id, ChangePasswordRequest request) {
+        // Verifica se a senha atual e a nova senha não excedem 72 bytes em UTF-8.
+        if (request.currentPassword()
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72
+                || request.newPassword()
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "A senha deve ter até 72 bytes UTF-8."
+            );
+        }
+
+        // Busca o usuário pelo ID e verifica se ele está ativo. Se não estiver, lança uma exceção de sessão inválida.
+        var user = users.findById(id)
+                .filter(AdminUser::active)
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Sessão inválida."
+                ));
+
+        // Verifica se o usuário tem permissão para alterar a senha.
+        if (!user.role().equals("ADMIN")) {
+            throw new ApiException(
+                    HttpStatus.FORBIDDEN,
+                    "Você não tem permissão para alterar a senha."
+            );
+        }
+
+        // Verifica se a senha atual fornecida corresponde à senha armazenada. Se não corresponder, lança uma exceção informando que a senha atual está incorreta.
+        if (!passwords.matches(request.currentPassword(), user.passwordHash())) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "A senha atual está incorreta.",
+                    "currentPassword"
+            );
+        }
+
+        // Verifica se a nova senha é diferente da senha atual. Se for igual, lança uma exceção informando que a nova senha deve ser diferente da senha atual.
+        if (passwords.matches(request.newPassword(), user.passwordHash())) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "A nova senha deve ser diferente da senha atual.",
+                    "newPassword"
+            );
+        }
+
+        // Codifica a nova senha e atualiza o hash da senha no banco de dados. Se a atualização falhar, lança uma exceção informando que não foi possível alterar a senha.
+        String newHash = passwords.encode(request.newPassword());
+
+        // Atualiza a senha do usuário no banco de dados, se o hash armazenada ainda for o mesmo.
+        boolean updated = users.updatePassword(id, user.passwordHash(), newHash);
+
+        // Se a atualização falhar, lança uma exceção informando que não foi possível alterar a senha.
+        if (!updated) {
+            throw new ApiException(
+                    HttpStatus.CONFLICT,
+                    "Não foi possível alterar a senha. Tente novamente."
+            );
+        }
+    }
+
     private UserResponse profile(AdminUser user) { return new UserResponse(user.id(), user.email(), user.role()); }
 
     public record LoginRequest(@NotBlank(message = "Informe o e-mail.") @Email(message = "Informe um e-mail válido.")

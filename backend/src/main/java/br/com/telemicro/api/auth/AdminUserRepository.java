@@ -29,4 +29,18 @@ public class AdminUserRepository {
     public void create(String email, String hash, String role) {
         jdbc.update("INSERT INTO admin_users(email, password_hash, role) VALUES (?, ?, ?)", email, hash, role);
     }
+
+    // Atualiza a senha do usuário com o ID fornecido, verificando se a senha atual corresponde ao hash armazenado.
+    public boolean updatePassword(UUID id, String currentHash, String newHash) {
+        int updatedRows = jdbc.update(
+                """
+                UPDATE admin_users
+                SET password_hash = ?
+                WHERE id = ? AND password_hash = ? AND active = true
+                """,
+                newHash, id, currentHash
+        );
+
+        return updatedRows == 1;
+    }
 }
