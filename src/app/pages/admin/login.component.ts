@@ -11,7 +11,10 @@ import { apiError } from '../../core/api';
     @if (auth.expired()) { <p role="status">Sua sessão expirou. Entre novamente.</p> }
     <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="busy"><fieldset [disabled]="busy"><legend>Acesso à conta</legend>
     <label>E-mail<input type="email" formControlName="email" autocomplete="username" maxlength="254" required /></label>
-    <label>Senha<input type="password" formControlName="password" autocomplete="current-password" maxlength="72" required /></label></fieldset>
+    <div class="password-field"><label for="login-password">Senha</label><div class="password-control">
+    <input id="login-password" [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password" maxlength="72" required />
+    <button type="button" class="password-toggle" aria-controls="login-password" [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'" (click)="showPassword = !showPassword">{{ showPassword ? 'Ocultar' : 'Mostrar' }}</button>
+    </div></div></fieldset>
     @if (form.invalid && form.touched) { <p role="alert">Informe um e-mail válido e sua senha.</p> }
     @if (error) { <p class="error" role="alert">{{ error }}</p> }
     <button class="button" [disabled]="busy">{{ busy ? 'Entrando…' : 'Entrar' }}</button>
@@ -23,6 +26,7 @@ export class LoginComponent {
   private readonly destroy = inject(DestroyRef);
   readonly form = inject(FormBuilder).nonNullable.group({ email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]], password: ['', [Validators.required, Validators.maxLength(72)]] });
   busy = false; error = '';
+  showPassword = false;
   submit(): void {
     if (this.busy) return;
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
