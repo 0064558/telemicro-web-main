@@ -87,6 +87,7 @@ public class SecurityConfig {
         return source;
     }
 
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JwtDecoder decoder, AdminUserRepository users,
             SecurityProperties properties, RequestRateLimiter limiter, @Value("${app.demo-enabled:false}") boolean demoEnabled)
@@ -108,6 +109,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/api/v1/services").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/budgets").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").authenticated()
+                        // Somente usuários com papel ADMIN podem alterar a senha de outro usuário.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/change-password").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/**").hasAnyRole("ADMIN", "DEMO")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().denyAll())
