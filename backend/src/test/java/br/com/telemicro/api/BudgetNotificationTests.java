@@ -73,7 +73,8 @@ class BudgetNotificationTests {
         var response = create(UUID.randomUUID().toString());
         JavaMailSender mail = mock(JavaMailSender.class);
         doThrow(new MailSendException("Erro simulado")).doNothing().when(mail).send(any(SimpleMailMessage.class));
-        var dispatcher = new NotificationDispatcher(jdbc, mail, "sender@example.test", "recipient@example.test", "http://localhost:4200/admin");
+        var dispatcher = new NotificationDispatcher(jdbc, (id, message) -> mail.send(message),
+                "sender@example.test", "recipient@example.test", "http://localhost:4200/admin");
         var transaction = new TransactionTemplate(transactions);
         transaction.executeWithoutResult(status -> dispatcher.dispatch());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM budget_requests", Integer.class)).isEqualTo(1);

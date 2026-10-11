@@ -36,3 +36,35 @@ describe('Admin authentication', () => {
     login(); tick(60000); expect(auth.accessToken).toBe(''); expect(auth.expired()).toBeTrue();
   }));
 });
+
+describe('Published API configuration', () => {
+  it('uses the configured HTTPS API and keeps the token away from other origins', () => {
+    const previousConfig = window.telemicroConfig;
+    window.telemicroConfig = { apiUrl: 'https://api.example.test/api/v1' };
+    let auth: AuthService | undefined;
+    try {
+      TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()] });
+      auth = TestBed.inject(AuthService);
+      const http = TestBed.inject(HttpTestingController);
+      const client = TestBed.inject(HttpClient);
+      spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+      auth.login('admin@example.test', 'password').subscribe();
+      http.expectOne('https://api.example.test/api/v1/auth/login').flush({
+        accessToken: 'test-token', expiresIn: 60,
+        user: { id: '1', email: 'admin@example.test', role: 'ADMIN' }
+      });
+      client.get('https://api.example.test/api/v1/admin/budgets').subscribe();
+      const admin = http.expectOne('https://api.example.test/api/v1/admin/budgets');
+      expect(admin.request.headers.get('Authorization')).toBe('Bearer test-token');
+      admin.flush({});
+      client.get('https://other.example.test/api/v1/admin/budgets').subscribe();
+      const other = http.expectOne('https://other.example.test/api/v1/admin/budgets');
+      expect(other.request.headers.has('Authorization')).toBeFalse();
+      other.flush({});
+      http.verify();
+    } finally {
+      auth?.logout();
+      window.telemicroConfig = previousConfig;
+    }
+  });
+});

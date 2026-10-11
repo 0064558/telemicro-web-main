@@ -10,6 +10,8 @@ Para iniciar com um único comando, na raiz do projeto, execute `./backend/scrip
 
 ## Avisos de novos orçamentos por e-mail
 
+Para Render Free, usar `MAIL_PROVIDER=resend` e configurar `RESEND_API_KEY`, `MAIL_FROM`, `MAIL_TO` e `MAIL_PANEL_URL` conforme o [guia de publicação](../deployment/README.md). O envio usa a API HTTPS do Resend, pois o Render Free bloqueia SMTP em 25/465/587. O modo SMTP continua como padrão para execução local. `MAIL_INTERVAL_MS` controla o intervalo do processamento (15 segundos por padrão; Blueprint usa 60 segundos). No Render pausado, os avisos aguardam a retomada da API.
+
 Na raiz, execute `./backend/scripts/Configure-Mail.ps1`. A senha de aplicativo é solicitada com entrada oculta e salva somente em `backend/.env.local`, ignorado pelo Git. O script configura o remetente `rodrigogggg12@gmail.com`, destinatário `rodrigodois9@gmail.com` e SMTP Gmail com STARTTLS obrigatório. Reinicie com `./backend/scripts/Start-Local.ps1`.
 
 No IntelliJ: recarregue o projeto Maven e configure as variáveis `MAIL_*` de `.env.local` na execução; o Spring não lê o arquivo automaticamente. Não coloque credenciais em configurações da IDE versionadas. Para produção, use segredos do provedor e ajuste `MAIL_PANEL_URL` para o painel publicado.
@@ -223,4 +225,4 @@ CORS permite somente origens explícitas em `CORS_ALLOWED_ORIGINS`, separadas po
 
 Referência: [Spring Security Resource Server JWT](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html).
 
-Planejamento completo em `../docs/PLANEJAMENTO.md`. O provisionamento Render/Neon/Vercel e a imagem Docker da API entram na etapa de publicação.
+Planejamento completo em `../docs/PLANEJAMENTO.md`. A imagem Java 21 e o Blueprint Render estão preparados; o provisionamento das contas e a validação externa seguem o [guia HostGator/Render/Neon](../deployment/README.md).

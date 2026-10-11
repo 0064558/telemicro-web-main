@@ -1,0 +1,27 @@
+DirectoryIndex index.html
+RewriteEngine On
+
+# Revalida o HTML e a URL publica da API depois de uma publicacao.
+<IfModule mod_headers.c>
+    <FilesMatch "^(index\.html|api-config\.js)$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+</IfModule>
+
+# Preserva os caminhos de validacao do certificado.
+RewriteRule ^\.well-known(?:/|$) - [END]
+
+# Mantem o redirecionamento para HTTPS.
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# A API sera hospedada separadamente; nao devolve HTML para chamadas de API.
+RewriteRule ^api(?:/|$) - [END]
+
+# Serve os arquivos e diretorios existentes normalmente.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [END]
+
+# Entrega a aplicacao Angular para suas rotas, incluindo /admin.
+RewriteRule ^ index.html [END]

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,8 +21,7 @@ public class NotificationDispatcher {
 
     // O JdbcTemplate é usado para buscar e atualizar avisos pendentes na tabela budget_notifications.
     private final JdbcTemplate jdbc;
-    // O JavaMailSender é usado para enviar e-mails de aviso.
-    private final JavaMailSender mail;
+    private final NotificationSender sender;
 
     // O remetente, destinatário e URL do painel são configurados via application.properties.
     private final String from;
@@ -31,12 +29,12 @@ public class NotificationDispatcher {
     private final String panelUrl;
 
     // O construtor lança exceção se não houver remetente, destinatário e URL do painel configurados.
-    public NotificationDispatcher(JdbcTemplate jdbc, JavaMailSender mail,
+    public NotificationDispatcher(JdbcTemplate jdbc, NotificationSender sender,
             @Value("${app.notifications.from}") String from,
             @Value("${app.notifications.to}") String to,
             @Value("${app.notifications.panel-url}") String panelUrl) {
         this.jdbc = jdbc;
-        this.mail = mail;
+        this.sender = sender;
         this.from = from;
         this.to = to;
         this.panelUrl = panelUrl;
@@ -66,7 +64,7 @@ public class NotificationDispatcher {
                 + "\nServiço: " + item.serviceName() + "\n\nConsulte e atenda pelo painel: " + panelUrl
                 + "\n\nTelemicro — Notificações");
         try {
-            mail.send(message);
+            sender.send(item.id(), message);
         } catch (RuntimeException exception) {
             // Se falhar, agendar nova tentativa em 5 minutos e registrar aviso no log.
             jdbc.update("""

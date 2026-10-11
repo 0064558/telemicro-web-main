@@ -49,6 +49,14 @@ class PublicBudgetApiTests {
     }
 
     @Test
+    void healthIsPublicAndChecksDatabaseWithoutDependingOnSmtp() throws Exception {
+        mvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.components").doesNotExist());
+    }
+
+    @Test
     void demoCredentialsAndSignedDemoTokenAreRejectedWhenDemoModeIsDisabled() throws Exception {
         UUID id = UUID.randomUUID();
         String hash = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(4).encode("Senha-de-teste-123");

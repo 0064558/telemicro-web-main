@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: telemicro-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://telemicroinformatica.com.br,https://www.telemicroinformatica.com.br
+      - key: DEMO_ENABLED
+        value: "false"
+      - key: BOOTSTRAP_ENABLED
+        value: "false"
+      - key: MAIL_ENABLED
+        value: "false"
+      - key: MAIL_PROVIDER
+        value: resend
+      - key: MAIL_INTERVAL_MS
+        value: "60000"
+      - key: MAIL_PANEL_URL
+        value: https://telemicroinformatica.com.br/admin

@@ -4,7 +4,7 @@ Landing page em Angular 20 standalone para a loja de informática em São João 
 
 ## Backend de orçamentos
 
-A API Java/Spring Boot está em [`backend/`](backend/README.md), com PostgreSQL, Flyway, pedidos com protocolo/idempotência, JWT via Spring Security e gestão administrativa com permissões ADMIN/DEMO. O formulário e o painel Angular já estão integrados. Consulte o [planejamento e roadmap](docs/PLANEJAMENTO.md). A próxima etapa prepara Docker, dados de demonstração e hospedagem.
+A API Java/Spring Boot está em [`backend/`](backend/README.md), com PostgreSQL, Flyway, pedidos com protocolo/idempotência, JWT via Spring Security e gestão administrativa com permissões ADMIN/DEMO. O formulário e o painel Angular já estão integrados. A publicação em HostGator, Render e Neon está preparada em [`deployment/`](deployment/README.md), com Docker e envio HTTPS pelo Resend. Os serviços externos ainda precisam ser configurados e validados. Consulte também o [planejamento e roadmap](docs/PLANEJAMENTO.md).
 
 ## Executar
 
@@ -25,7 +25,7 @@ Os arquivos prontos ficam em `dist/telemicro-web/browser`. A entrada da aplicaç
 
 Para usar o formulário e o painel, inicie o banco e a API seguindo `backend/README.md`, depois execute `npm start`. O proxy de desenvolvimento encaminha `/api` para `http://localhost:8080`; não é necessário alterar CORS para esse fluxo. Entre em `http://localhost:4200/admin` com `admin@telemicro.local` e a senha de `backend/.env.local` criada pelo script local. Esse arquivo é ignorado pelo Git.
 
-`API_URL` em `src/app/core/api.ts` define a base pública da API (padrão `/api/v1`). Na publicação, configure a URL HTTPS da API Render ou um encaminhamento equivalente na Vercel; o proxy de desenvolvimento não faz parte do build. URLs, e não segredos, podem estar no frontend. A configuração de publicação será entregue na etapa 5.
+`API_URL` em `src/app/core/api.ts` lê a base pública de `src/assets/config/api-config.js` (padrão `/api/v1`). O script `deployment/hostgator/Build-Package.ps1` configura a URL HTTPS real da API Render no pacote publicado; o proxy de desenvolvimento não faz parte do build. Somente a URL pública pode estar no frontend, sem segredos. Consulte o [guia de publicação](deployment/README.md).
 
 ## Organização
 

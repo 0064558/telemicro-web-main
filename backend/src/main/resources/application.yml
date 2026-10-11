@@ -21,7 +21,7 @@ spring:
     hikari:
       maximum-pool-size: 5
       minimum-idle: 0
-      connection-timeout: 10000
+      connection-timeout: 30000
   jpa:
     open-in-view: false
     hibernate:
@@ -38,6 +38,10 @@ server:
     include-message: never
     include-stacktrace: never
 management:
+  health:
+    # A entrega e assincrona; SMTP indisponivel nao deve retirar a API do ar.
+    mail:
+      enabled: false
   endpoints:
     web:
       exposure:
@@ -49,6 +53,9 @@ management:
 app:
   notifications:
     enabled: ${MAIL_ENABLED:false}
+    provider: ${MAIL_PROVIDER:smtp}
+    resend-api-key: ${RESEND_API_KEY:}
+    interval-ms: ${MAIL_INTERVAL_MS:15000}
     from: ${MAIL_FROM:}
     to: ${MAIL_TO:}
     panel-url: ${MAIL_PANEL_URL:http://localhost:4200/admin}

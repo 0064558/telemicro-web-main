@@ -1,7 +1,14 @@
 import { InjectionToken } from '@angular/core';
 
-// Configure the public API URL here when publishing the demo.
-export const API_URL = new InjectionToken<string>('API_URL', { providedIn: 'root', factory: () => '/api/v1' });
+declare global {
+  interface Window { telemicroConfig?: { apiUrl: string } }
+}
+
+// A configuracao publica e carregada antes do Angular, sem segredos no frontend.
+export const API_URL = new InjectionToken<string>('API_URL', {
+  providedIn: 'root',
+  factory: () => typeof window === 'undefined' ? '/api/v1' : window.telemicroConfig?.apiUrl ?? '/api/v1'
+});
 export interface ServiceOption { code: string; name: string }
 export type Status = 'NEW' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 export const STATUS_LABELS: Record<Status, string> = { NEW: 'Novo', IN_PROGRESS: 'Em atendimento', COMPLETED: 'Concluído', CANCELLED: 'Cancelado' };
