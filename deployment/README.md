@@ -5,9 +5,11 @@
 1. Criar um banco dedicado no Neon, PostgreSQL 17, numa regiao proxima/igual a do Render.
 2. Publicar a API no Render usando o Dockerfile em `backend/`.
 3. Criar o primeiro administrador e verificar login/catalogo/CORS.
-4. Verificar o dominio no Resend, ativar as notificacoes e testar a entrega.
-5. Gerar o ZIP do Angular com a URL real da API e publicar apenas na pasta da Telemicro.
-6. Validar o fluxo inteiro em HTTPS antes de entregar o acesso administrativo.
+4. Gerar o ZIP do Angular com a URL real da API e publicar apenas na pasta da Telemicro.
+5. Validar o formulario e o painel em HTTPS antes de entregar o acesso administrativo.
+6. Quando houver acesso ao DNS, verificar o dominio no Resend, ativar as notificacoes e testar a entrega.
+
+As notificacoes podem ficar pendentes sem impedir o formulario e o painel: manter `MAIL_ENABLED=false` no Render. Nesse modo, os pedidos sao salvos normalmente, mas nao entram na fila de avisos. Ativar os e-mails depois nao envia avisos retroativos desses pedidos. Enquanto isso, a equipe precisa acompanhar as novas solicitacoes no painel.
 
 ## Neon
 
@@ -72,7 +74,7 @@ O Render Free bloqueia SMTP nas portas 25, 465 e 587. Usar o envio HTTPS impleme
    - `MAIL_ENABLED=true`.
 5. Criar um pedido identificado como teste pelo formulario e verificar protocolo, painel e caixa de entrada (incluindo spam). O sucesso da API de envio significa aceite do provedor; a entrega precisa ser conferida.
 
-A fila existente preserva avisos entre reinicios e tenta novamente apos falha. O Resend recebe uma chave estavel por pedido e deduplica por 24 horas; nao e uma garantia de exatamente um envio para sempre. O e-mail contem protocolo, servico e link do painel, sem telefone, nome ou mensagem do cliente.
+Com `MAIL_ENABLED=true`, a fila preserva avisos entre reinicios e tenta novamente apos falha. Pedidos criados com `MAIL_ENABLED=false` nao geram avisos nessa fila. O Resend recebe uma chave estavel por pedido e deduplica por 24 horas; nao e uma garantia de exatamente um envio para sempre. O e-mail contem protocolo, servico e link do painel, sem telefone, nome ou mensagem do cliente.
 
 ## HostGator
 
@@ -81,7 +83,7 @@ O backup atual ja foi feito pelo usuario. Confirmar que o ZIP pode ser aberto an
 Depois de obter a URL real do Render, na raiz do projeto:
 
 ```powershell
-./deployment/hostgator/Build-Package.ps1 -ApiUrl 'https://NOME_REAL.onrender.com/api/v1'
+./deployment/hostgator/Build-Package.ps1 -ApiUrl 'https://telemicro-api.onrender.com/api/v1'
 ```
 
 O script gera um ZIP em `release/` com somente arquivos publicos do Angular, configuracao da URL e `.htaccess`. Nenhum arquivo do backend, senha ou chave deve entrar nesse pacote.
@@ -104,8 +106,10 @@ Referencias: [Render Docker](https://render.com/docs/docker), [Render Free](http
 
 - 41 testes de backend passaram, com PostgreSQL isolado e envio de e-mail simulado. A suite completa passou antes do ultimo ajuste de health; as suites afetadas (17 testes) foram repetidas depois da correcao, sem falhas ou testes ignorados.
 - 16 testes de frontend passaram no ChromeHeadless; build de producao passou.
-- O ZIP de teste continha index, configuracao publica e .htaccess, sem arquivos privados; o pacote com URL ficticia foi removido. Gerar o pacote real somente depois de obter a URL da API publicada.
+- O pacote real `release/telemicro-hostgator-20261011-144942818.zip` foi gerado com `https://telemicro-api.onrender.com/api/v1`. Seus 32 arquivos incluem index, configuracao publica e .htaccess, sem backend, credenciais ou arquivos de desenvolvimento. A geracao de producao passou; falta extrair e validar na HostGator.
 - A imagem final compilou e iniciou com Java 21, 1 CPU e limite de 512 MB. Health UP, sete servicos no catalogo, consumo observado de 270,1 MiB depois da inicializacao. Esse valor e uma observacao em repouso, nao um teste de carga.
 - A verificacao SMTP do Actuator foi desativada: falhas do provedor de e-mail sao tratadas pela fila e nao devem impedir readiness da API. A checagem de conexao ao banco continua ativa.
 - O teste `Test-RenderContainer.ps1` utiliza banco/rede temporarios e remove os containers ao concluir. Os dados locais da loja nao entram nesse teste.
-- Ainda pendentes: criacao/configuracao dos servicos externos, envio dos arquivos ao repositorio conectado, administrador de producao, DNS/Resend, IP confiavel do proxy, entrega real de e-mail, publicacao na HostGator e verificacao do fluxo com pausa/retomada do Render.
+- API publicada no Render e banco configurado no Neon. Health e catalogo foram verificados, assim como CORS para as duas origens HTTPS do site e rejeicao de uma origem externa.
+- Publicacao na HostGator confirmada: pagina inicial e rotas `/admin` e `/admin/login` respondem, arquivos JS/CSS carregam e a configuracao publica aponta para a API real. HTTP redireciona para HTTPS, e a origem www tambem responde. No navegador, o formulario carregou os sete servicos e `/admin` redirecionou para o login sem autenticacao. Isso ainda nao valida o envio de um pedido ou o login com credenciais reais.
+- Ainda pendentes: confirmar o primeiro login do administrador de producao, criar um pedido de teste e verificar o atendimento no painel, IP confiavel do proxy e verificacao do fluxo com pausa/retomada do Render. DNS/Resend e entrega real de e-mail ficam para uma etapa posterior, por decisao do usuario; o dominio nao apareceu na conta Cloudflare acessada.
